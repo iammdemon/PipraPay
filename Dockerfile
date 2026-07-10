@@ -35,8 +35,9 @@ RUN git clone --branch 3.7.0 --depth 1 https://github.com/Imagick/imagick.git /t
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Enable AllowOverride in Apache configs to make .htaccess work
-RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Enable AllowOverride in Apache configs to make .htaccess work safely
+RUN printf '<Directory /var/www/html>\n    AllowOverride All\n</Directory>\n' > /etc/apache2/conf-available/override.conf \
+    && a2enconf override
 
 # Set working directory
 WORKDIR /var/www/html

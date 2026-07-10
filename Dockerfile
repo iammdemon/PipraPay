@@ -3,22 +3,34 @@ FROM php:8.1-apache
 # Use the default production configuration
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Install system utilities
-RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libmagickwand-dev \
+    libonig-dev \
+    unzip \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Add docker-php-extension-installer
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN chmod +x /usr/local/bin/install-php-extensions
-
-# Install PHP extensions using the installer
-RUN install-php-extensions \
+# Configure and install core PHP extensions (non-PECL)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -y \
     gd \
     pdo_mysql \
-    zip \
-    fileinfo \
-    mbstring \
-    curl \
-    imagick
+    zip
+
+# Compile and install Imagick from source to bypass PECL XML channel errors
+RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick \
+    && cd /tmp/imagick \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && docker-php-ext-enable imagick \
+    && rm -rf /tmp/imagick
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -37,4 +49,3 @@ RUN chown -R www-data:www-data /var/www/html
 
 # Expose port 80
 EXPOSE 80
-

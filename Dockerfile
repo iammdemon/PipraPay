@@ -20,7 +20,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
     gd \
     pdo_mysql \
-    zip
+    zip \
+    bcmath
 
 # Compile and install Imagick from source to bypass PECL XML channel errors
 RUN git clone --branch 3.7.0 --depth 1 https://github.com/Imagick/imagick.git /tmp/imagick \

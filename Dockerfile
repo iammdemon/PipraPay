@@ -3,31 +3,22 @@ FROM php:8.2-apache
 # Use the default production configuration
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    libmagickwand-dev \
-    libonig-dev \
-    libcurl4-openssl-dev \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+# Install system utilities
+RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 
-# Install imagick from PECL
-RUN pecl install imagick && docker-php-ext-enable imagick
+# Add docker-php-extension-installer
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions
 
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -y \
+# Install PHP extensions using the installer
+RUN install-php-extensions \
     gd \
-    pdo \
     pdo_mysql \
     zip \
     fileinfo \
     mbstring \
-    curl
+    curl \
+    imagick
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -46,3 +37,4 @@ RUN chown -R www-data:www-data /var/www/html
 
 # Expose port 80
 EXPOSE 80
+

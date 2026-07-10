@@ -4,8 +4,8 @@ FROM php:8.1-apache-bookworm
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Install system dependencies
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -23,7 +23,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     zip
 
 # Compile and install Imagick from source to bypass PECL XML channel errors
-RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick \
+RUN git clone --branch 3.7.0 --depth 1 https://github.com/Imagick/imagick.git /tmp/imagick \
     && cd /tmp/imagick \
     && phpize \
     && ./configure \

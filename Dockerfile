@@ -4,13 +4,13 @@ FROM php:8.1-apache-bookworm
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     libpng-dev \
-    libjpeg62-turbo-dev \
+    libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     libmagickwand-dev \
-    libonig-dev \
     unzip \
     git \
     && rm -rf /var/lib/apt/lists/*

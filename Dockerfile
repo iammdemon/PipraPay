@@ -1,0 +1,48 @@
+FROM php:8.2-apache
+
+# Use the default production configuration
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libmagickwand-dev \
+    libonig-dev \
+    libcurl4-openssl-dev \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install imagick from PECL
+RUN pecl install imagick && docker-php-ext-enable imagick
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -y \
+    gd \
+    pdo \
+    pdo_mysql \
+    zip \
+    fileinfo \
+    mbstring \
+    curl
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Enable AllowOverride in Apache configs to make .htaccess work
+RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . /var/www/html/
+
+# Set ownership of all files to Apache's default user
+RUN chown -R www-data:www-data /var/www/html
+
+# Expose port 80
+EXPOSE 80

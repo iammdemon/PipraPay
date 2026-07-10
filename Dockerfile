@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
     libmagickwand-dev \
     unzip \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    > /dev/null && rm -rf /var/lib/apt/lists/*
 
 # Configure and install core PHP extensions (non-PECL)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \

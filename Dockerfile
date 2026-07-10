@@ -1,4 +1,4 @@
-FROM php:8.1-apache
+FROM php:8.1-apache-bookworm
 
 # Use the default production configuration
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

@@ -17,7 +17,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
 
 # Configure and install core PHP extensions (non-PECL)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -y \
+    && docker-php-ext-install \
     gd \
     pdo_mysql \
     zip
